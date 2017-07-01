@@ -11,6 +11,7 @@
 - name: set internal variable platform-suffix for convenience
   set_fact:
     prometheus_platform_suffix: "{{ ansible_architecture | lower }}-{{ ansible_machine }}"
+  when: ansible_architecture != "armv7l"
 
 # Could not find a way to chop the "l" off of "armv7l"
 - name: Override platform-suffix for ARM suffixes
