@@ -10,7 +10,13 @@
 
 - name: set internal variable platform-suffix for convenience
   set_fact:
-    prometheus_platform_suffix: "{{ ansible_system|lower }}-{{ ansible_machine }}"
+    prometheus_platform_suffix: "{{ ansible_architecture | lower }}-{{ ansible_machine }}"
+
+# Could not find a way to chop the "l" off of "armv7l"
+- name: Override platform-suffix for ARM suffixes
+  set_fact:
+    prometheus_platform_suffix: "armv7-{{ ansible_machine }}"
+  when: ansible_architecture == "armv7l"
 
 - block:
   - name: use systemd for CentOS >= 7
