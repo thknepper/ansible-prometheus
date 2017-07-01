@@ -20,16 +20,9 @@
   apt: name=build-essential state=present update_cache=yes
   when: ansible_pkg_mgr == "apt"
 
-
 - name: set internal variables for convenience
   set_fact:
-    prometheus_golang_tarball_url: "https://storage.googleapis.com/golang/go{{ prometheus_go_version }}.linux-amd64.tar.gz"
-  when: ansible_userspace_bits == "64"
-
-- name: set internal variables for convenience
-  set_fact:
-    prometheus_golang_tarball_url: "https://storage.googleapis.com/golang/go{{ prometheus_go_version }}.linux-386.tar.gz"
-  when: ansible_userspace_bits == "32"
+    prometheus_golang_tarball_url: "https://storage.googleapis.com/golang/go{{ prometheus_go_version }}.{{ prometheus_platform_suffix }}.tar.gz"
 
 - name: mkdir for Golang
   file: path={{ item }}  state=directory
