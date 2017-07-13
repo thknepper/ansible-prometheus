@@ -1,66 +1,51 @@
----
-# file: tasks/install-prometheus.yml
 #
 # Install Prometheus server.
 #
-# @see http://prometheus.io/docs/introduction/getting_started/
-#
+
+---
 
 - block:
-
     - name: set internal variables for convenience
       set_fact:
         prometheus_subdir: "{{ prometheus_install_path }}/prometheus-{{ prometheus_version }}.{{ prometheus_platform_suffix }}"
-
-
     - name: set download url for versions >= 1.0.0
       set_fact:
         prometheus_tarball_url: "https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.{{ prometheus_platform_suffix }}.tar.gz"
       when: prometheus_version | version_compare('1.0', '>=')
-
     - name: set download url for versions < 1.0.0
       set_fact:
         prometheus_tarball_url: "https://github.com/prometheus/prometheus/releases/download/{{ prometheus_version }}/prometheus-{{ prometheus_version }}.{{ prometheus_platform_suffix }}.tar.gz"
       when: prometheus_version | version_compare('1.0', '<')
-
     - name: set daemon dir for versions >= 0.16
       set_fact:
         prometheus_daemon_dir: "{{ prometheus_subdir }}"
       when: prometheus_version | version_compare('0.16', '>=')
-
     - name: set daemon dir for versions < 0.16 (OBSOLETE!)
       set_fact:
         prometheus_daemon_dir: "{{ prometheus_install_path }}"
       when: prometheus_version | version_compare('0.16', '<')
-
     - name: download and untar prometheus tarball
       unarchive:
         src: "{{ prometheus_tarball_url }}"
         dest: "{{ prometheus_install_path }}"
         creates: "{{prometheus_install_path}}/prometheus-{{prometheus_version}}.linux-{{ (ansible_userspace_bits == '32') | ternary('386', 'amd64') }}"
         copy: no
-
   when: prometheus_version != "git"
 
-
 - block:
-
     - name: set internal variables for convenience
       set_fact:
         prometheus_git_url: "https://github.com/prometheus/prometheus.git"
         prometheus_src_path: "{{ prometheus_goroot }}/src/github.com/prometheus/prometheus"
         prometheus_daemon_dir: "{{ prometheus_install_path }}"
-
     - name: delete the prometheus build directory, if necessary
       file: path="{{ prometheus_src_path }}" state=absent
       when: prometheus_rebuild
-
     - name: clone the prometheus project src
       git:
         repo: "{{ prometheus_git_url }}"
         dest: "{{ prometheus_src_path }}"
         force: yes
-
     - name: build prometheus
       command: make build
       args:
@@ -71,7 +56,6 @@
         GOROOT: "{{ prometheus_goroot }}"
         GOPATH: "{{ prometheus_gopath }}"
         PATH: "{{ ansible_env.PATH }}:{{ prometheus_goroot }}/bin:{{ prometheus_gopath }}/bin"
-
     - name: copy the built prometheus to the install path
       command: "cp -r {{ prometheus_src_path }}/{{ item }} {{ prometheus_install_path }}"
       with_items:
@@ -79,10 +63,7 @@
         - promtool
         - consoles
         - console_libraries
-
   when: prometheus_version == "git"
-
-
 
 - name: set permissions, owner and group
   file:
@@ -121,8 +102,6 @@
 
 - name: set INIT status
   service: name=prometheus enabled=yes
-
-
 
 - name: copy rule files from playbook's, if any
   copy:
