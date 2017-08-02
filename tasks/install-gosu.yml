@@ -11,7 +11,7 @@
 
 - name: set internal variables for convenience
   set_fact:
-    gosu_exe_url: "https://github.com/tianon/gosu/releases/download/{{ gosu_version }}/gosu-{{ gosu_arch }}"
+    gosu_exe_url: "https://github.com/tianon/gosu/releases/download/{{ gosu_version }}/gosu-{{ gosu_arch.stdout }}"
 
 - name: download gosu executable
   get_url: url="{{ gosu_exe_url }}"  dest="/usr/local/bin/gosu"
